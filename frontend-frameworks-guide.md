@@ -18,6 +18,7 @@ You can absolutely be a legitimate developer using vanilla CSS and JavaScript. I
 | **Foundation** | Medium | Medium | Enterprise applications, complex responsive layouts | Advanced grid system, accessibility features, email templates |
 | **Pure CSS** | Low | Very Low | Lightweight projects, performance-critical applications | Minimal file size, modular approach |
 | **Sass/SCSS** | Very High (preprocessor) | Low | Any CSS project that benefits from variables and nesting | Variables, nesting, mixins, functions, modular architecture |
+| **Tachyons** | Low | Low | Projects prioritizing performance, atomic design | Atomic CSS approach, small file size, highly composable |
 
 ### CSS Frameworks: Deeper Insights
 
@@ -40,6 +41,87 @@ You can absolutely be a legitimate developer using vanilla CSS and JavaScript. I
 - **Adoption**: Industry standard CSS enhancement
 - **Advantages**: Makes CSS more maintainable with variables, nesting, and functions
 - **When to choose**: Can be used alongside any CSS framework or vanilla CSS
+
+#### Tachyons
+- **Note**: One of the original atomic CSS frameworks that influenced Tailwind
+- **Philosophy**: Strictly follows atomic design principles where each class does exactly one thing
+- **Advantages**: Very small file size, highly performant, strong composition abilities
+- **Disadvantages**: Less modern features than Tailwind, smaller community
+- **When to choose**: For projects where file size and performance are critical priorities
+
+## Component-Based vs. Modular Approaches
+
+To better understand the different approaches to web development, let's clarify two important concepts:
+
+### Component-Based Design
+
+**Component-based design** refers to breaking down a user interface into reusable, self-contained pieces (components) that encapsulate their own HTML structure, CSS styling, and JavaScript behavior. This approach is fundamental to modern frameworks like React, Vue, and Angular.
+
+Key characteristics of component-based design:
+
+- **Self-contained**: Components include everything they need to function
+- **Reusable**: Components can be used in multiple places in an application
+- **Hierarchical**: Complex components can be built from simpler components
+- **Encapsulated**: Internal implementation details are hidden from other components
+
+Contrary to potentially limiting customization, component-based design actually **enhances customization** through:
+
+1. **Props/Parameters**: Components accept inputs that modify their appearance and behavior
+2. **Composition**: Smaller components can be combined in countless ways
+3. **Extension**: Base components can be extended for specialized uses
+4. **Theming**: Global style variables can transform component appearance
+
+Examples of component-based frameworks:
+- React, Vue, Angular (JavaScript frameworks)
+- Bootstrap, Material-UI (UI component libraries)
+
+### Modular Approach
+
+A **modular approach** refers to organizing code into independent, interchangeable modules that each handle a specific functionality. This can apply to both CSS and JavaScript.
+
+Key characteristics of modular approaches:
+
+- **Separation of concerns**: Different modules handle different aspects of functionality
+- **Independent**: Modules can work independently of each other
+- **Combinable**: Developers can include only the modules they need
+- **Maintainable**: Changes to one module don't affect others
+
+In CSS frameworks:
+- **Component-based CSS frameworks** (like Bootstrap) provide pre-designed components with both structure and styling
+- **Utility-first CSS frameworks** (like Tailwind) provide small, single-purpose utility classes to combine
+- **Atomic CSS frameworks** (like Tachyons) take the utility-first approach to its logical extreme, with each class doing exactly one thing
+
+### Utility-first vs. Atomic CSS
+
+While these terms are sometimes used interchangeably, there are subtle differences:
+
+| Aspect | Utility-first (Tailwind) | Atomic CSS (Tachyons) |
+|--------|--------------------------|----------------------|
+| **Class purpose** | Mostly one property per class | Strictly one property per class |
+| **Design system** | Works within a configurable design system | More focused on composition than design system |
+| **Generation** | Pre-defined utility classes | Originally focused on programmatically generated classes |
+| **Responsive design** | Built-in responsive utilities and variants | Basic responsive utilities |
+| **Current popularity** | Very high, growing | Lower, pioneered concepts now in Tailwind |
+
+### Component-Based vs. Modular: Clarifying the Difference
+
+The confusion often stems from how these terms are used in different contexts:
+
+| Aspect | Component-Based | Modular |
+|--------|----------------|---------|
+| **Focus** | UI building blocks | Code organization |
+| **Scope** | Primarily frontend | Any software aspect |
+| **Customization** | High (through props, composition) | High (through module selection) |
+| **Example in CSS** | `.card`, `.navbar` components | Separate files for typography, colors, layout |
+| **Example in JS** | React components | JavaScript modules for authentication, data fetching, etc. |
+
+**Important clarification**: Component-based design and modular approaches are not opposites—they're complementary concepts that can be used together. Modern web development typically uses:
+
+1. Component-based UI architecture (React/Vue/Angular)
+2. Modular organization of code (separate files/modules for different functionality)
+3. Either component-based or utility-first CSS approaches (or a mixture)
+
+Both approaches offer extensive customization options—they just provide different ways of organizing and thinking about that customization.
 
 ## JavaScript Frameworks and Libraries
 
@@ -88,6 +170,50 @@ You can absolutely be a legitimate developer using vanilla CSS and JavaScript. I
 
 ## Meta-Frameworks and Full-Stack Solutions
 
+### What is a Meta-Framework?
+
+A **meta-framework** is a framework built on top of another framework, extending its capabilities with additional features and conventions. Think of it as a "framework for a framework" that adds structure, functionality, and optimization that the base framework doesn't provide out of the box.
+
+For example:
+- **Next.js** is a meta-framework built on top of React
+- **Nuxt.js** is a meta-framework built on top of Vue.js
+- **SvelteKit** is a meta-framework built on top of Svelte
+
+### What Meta-Frameworks Add to Base Frameworks
+
+1. **Project Structure and Conventions**: Meta-frameworks provide opinionated directory structures and naming conventions that standardize how applications are built.
+
+2. **Built-in Routing**: While base frameworks like React don't include routing systems, meta-frameworks typically provide file-based routing where the file structure automatically creates application routes.
+
+3. **Rendering Strategies**: Meta-frameworks add different ways to render your application:
+   - **Server-Side Rendering (SSR)**: Generating HTML on the server
+   - **Static Site Generation (SSG)**: Pre-rendering pages at build time
+   - **Client-Side Rendering (CSR)**: Rendering in the browser (the default for base frameworks)
+   - **Incremental Static Regeneration (ISR)**: Updating static pages after they've been built
+
+4. **Build Optimization**: Advanced asset optimization, code splitting, and bundling configurations.
+
+5. **Development Experience**: Improved developer tools, hot reloading, and debugging capabilities.
+
+### What "Full-Stack Focus" Means
+
+A framework with "full-stack focus" provides tools for both frontend (what users see in the browser) and backend (server-side code, database interactions) development in a unified way. Traditional frameworks like React or Vue primarily handle just the frontend (UI) part of web development.
+
+Full-stack meta-frameworks bridge this gap by offering:
+
+1. **API Routes**: The ability to create backend API endpoints within the same project structure as your frontend code.
+   - Example: In Next.js, putting a file in `pages/api/users.js` automatically creates a `/api/users` endpoint.
+
+2. **Database Integrations**: Built-in or simplified ways to connect to databases.
+
+3. **Server-Side Code**: The ability to write code that runs on the server, not just in the browser.
+
+4. **Authentication Systems**: Built-in or easily integrated user authentication.
+
+5. **Unified Deployment**: Deploy both frontend and backend together as a single application.
+
+The key benefit is that developers can build complete applications without switching between separate frontend and backend codebases, using the same language (JavaScript/TypeScript) throughout the entire stack.
+
 | Framework | Based On | Focus | Best Use Cases | Key Features |
 |-----------|----------|-------|----------------|--------------|
 | **Next.js** | React | Full-stack | Production React applications, SEO-focused sites | Server-side rendering, static site generation, API routes |
@@ -95,20 +221,6 @@ You can absolutely be a legitimate developer using vanilla CSS and JavaScript. I
 | **Astro** | Agnostic | Content-focused | Content-heavy websites, blogs, documentation | Use any UI framework, partial hydration, content focus |
 | **SvelteKit** | Svelte | Full-stack | Svelte production applications | File-based routing, SSR, deployment flexibility |
 | **Remix** | React | Full-stack | Web applications with rich interactions | Nested routing, server rendering, progressive enhancement |
-
-### Key Concepts in Meta-Frameworks
-
-**Server-Side Rendering (SSR)** - Generating HTML on the server instead of in the browser, which provides better SEO and faster initial load times.
-
-**Static Site Generation (SSG)** - Pre-rendering pages at build time rather than on each request, resulting in very fast load times and easy hosting.
-
-**Hydration** - The process where a client-side JavaScript application takes over a server-rendered HTML page, making it interactive.
-
-**File-based Routing** - A system where the file structure in your project automatically defines the routes in your application (e.g., a file at `pages/about.js` creates an `/about` route).
-
-**API Routes** - Backend functionality built into your frontend framework, allowing you to create API endpoints within the same project.
-
-**Full-stack** - Handling both frontend (what users see) and backend (server-side processing, databases) aspects of web development in a single framework.
 
 ## Choosing the Right Tools
 
@@ -305,41 +417,66 @@ Remember that frameworks are tools to help you solve problems more efficiently, 
 
 The field will continue to evolve, but investing time in learning the fundamentals and then adding framework knowledge is a sustainable approach to staying relevant in web development.
 
-## Glossary of Web Development Terms
+## Component-Based vs. Modular Approaches
 
-This glossary explains technical terms that may be unfamiliar to beginners:
+To clarify an important distinction in web development approaches:
 
-### General Concepts
+### Component-Based Design
 
-**AJAX** - Asynchronous JavaScript and XML; a technique for updating parts of a web page without reloading the entire page.
+**Component-based design** refers to breaking down a user interface into reusable, self-contained pieces (components) that encapsulate their own HTML structure, CSS styling, and JavaScript behavior. This approach is fundamental to modern frameworks like React, Vue, and Angular.
 
-**API** - Application Programming Interface; a set of rules that allows different software applications to communicate with each other.
+Key characteristics of component-based design:
 
-**BEM** - Block Element Modifier; a methodology for naming CSS classes to create reusable components.
+- **Self-contained**: Components include everything they need to function
+- **Reusable**: Components can be used in multiple places in an application
+- **Hierarchical**: Complex components can be built from simpler components
+- **Encapsulated**: Internal implementation details are hidden from other components
 
-**CDN** - Content Delivery Network; a system of distributed servers that deliver web content to users based on their geographic location.
+Contrary to potentially limiting customization, component-based design actually **enhances customization** through:
 
-**CI/CD** - Continuous Integration/Continuous Deployment; automated processes for testing and deploying code changes.
+1. **Props/Parameters**: Components accept inputs that modify their appearance and behavior
+2. **Composition**: Smaller components can be combined in countless ways
+3. **Extension**: Base components can be extended for specialized uses
+4. **Theming**: Global style variables can transform component appearance
 
-**Component-based Design** - A development approach where UIs are built from self-contained, reusable components that encapsulate their own structure, behavior, and styling.
+Examples of component-based frameworks:
+- React, Vue, Angular (JavaScript frameworks)
+- Bootstrap, Material-UI (UI component libraries)
 
-**DOM** - Document Object Model; a programming interface for HTML documents that represents the page as a tree of objects.
+### Modular Approach
 
-**JSON** - JavaScript Object Notation; a lightweight data interchange format that's easy for humans to read and write.
+A **modular approach** refers to organizing code into independent, interchangeable modules that each handle a specific functionality. This can apply to both CSS and JavaScript.
 
-**Micro-frontends** - An architectural style where frontend applications are broken down into smaller, independent pieces that can be developed, tested, and deployed independently.
+Key characteristics of modular approaches:
 
-**Responsive Design** - An approach to web design that makes web pages render well on a variety of devices and window/screen sizes.
+- **Separation of concerns**: Different modules handle different aspects of functionality
+- **Independent**: Modules can work independently of each other
+- **Combinable**: Developers can include only the modules they need
+- **Maintainable**: Changes to one module don't affect others
 
-**REST** - Representational State Transfer; an architectural style for designing networked applications.
+In CSS frameworks:
+- **Component-based CSS frameworks** (like Bootstrap) provide pre-designed components with both structure and styling
+- **Utility-first CSS frameworks** (like Tailwind) provide small, single-purpose utility classes to combine
 
-**SEO** - Search Engine Optimization; the practice of improving a website to increase its visibility in search engines.
+### Component-Based vs. Modular: Clarifying the Difference
 
-**SSR** - Server-Side Rendering; generating HTML on the server instead of in the browser.
+The confusion often stems from how these terms are used in different contexts:
 
-**Static Site Generation (SSG)** - Pre-rendering pages at build time rather than on each request.
+| Aspect | Component-Based | Modular |
+|--------|----------------|---------|
+| **Focus** | UI building blocks | Code organization |
+| **Scope** | Primarily frontend | Any software aspect |
+| **Customization** | High (through props, composition) | High (through module selection) |
+| **Example in CSS** | `.card`, `.navbar` components | Separate files for typography, colors, layout |
+| **Example in JS** | React components | JavaScript modules for authentication, data fetching, etc. |
 
-**Virtual DOM** - A programming concept where a virtual representation of the UI is kept in memory and synced with the "real" DOM (used by React and similar libraries).
+**Important clarification**: Component-based design and modular approaches are not opposites—they're complementary concepts that can be used together. Modern web development typically uses:
+
+1. Component-based UI architecture (React/Vue/Angular)
+2. Modular organization of code (separate files/modules for different functionality)
+3. Either component-based or utility-first CSS approaches (or a mixture)
+
+Both approaches offer extensive customization options—they just provide different ways of organizing and thinking about that customization.
 
 ### CSS-Related Terms
 
@@ -351,7 +488,11 @@ This glossary explains technical terms that may be unfamiliar to beginners:
 
 **Media Query** - A CSS technique used for applying different styles based on the device characteristics.
 
-**Utility-first CSS** - An approach where you build designs by applying small, single-purpose utility classes directly in your HTML (e.g., Tailwind CSS).
+**Utility-first CSS** - An approach to CSS where instead of creating semantic class names (like `.card`, `.button`), you apply many small, single-purpose utility classes directly in your HTML (like `.flex`, `.p-4`, `.text-center`, `.rounded`). This approach prioritizes composition over inheritance and abstraction. Tailwind CSS is the most popular utility-first framework.
+
+**Atomic CSS** - Similar to utility-first, this approach uses classes that do exactly one thing (e.g., `.mt-1` for margin-top: 0.25rem), creating a larger number of smaller, reusable CSS rules rather than fewer, more specific rules. Sometimes used interchangeably with utility-first.
+
+**BEM (Block Element Modifier)** - A CSS methodology and naming convention that organizes CSS into blocks (standalone components), elements (parts of blocks), and modifiers (variations), using class names like `.block__element--modifier`.
 
 ### JavaScript-Related Terms
 
