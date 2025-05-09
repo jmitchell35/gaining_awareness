@@ -222,38 +222,100 @@ The key benefit is that developers can build complete applications without switc
 | **SvelteKit** | Svelte | Full-stack | Svelte production applications | File-based routing, SSR, deployment flexibility |
 | **Remix** | React | Full-stack | Web applications with rich interactions | Nested routing, server rendering, progressive enhancement |
 
-## Choosing the Right Tools
+## Modern Component Libraries and Design Systems
 
-### For Your TP - Développeur Web et Web Mobile Certification
+When building web applications, you'll often want pre-designed components that you can customize to match your design needs. Here are some of the most popular component libraries and design systems in 2025:
 
-Given the certification requirements, here's what I recommend:
+### React-Based Component Libraries
 
-1. **CSS**: Demonstrate proficiency with at least one of these:
-   - Tailwind CSS (very modern approach, highly valued)
-   - Bootstrap (widely used, easy to implement quickly)
-   - Or solid vanilla CSS with a well-structured approach (using CSS variables, etc.)
+| Library | Type | Customization | Best For | Key Features |
+|---------|------|--------------|----------|--------------|
+| **shadcn/ui** | Component collection | High | Custom designs with production-ready components | Not a library but a collection of reusable components |
+| **Material UI** | Complete design system | Medium | Google Material Design implementations | Comprehensive, mature ecosystem |
+| **Chakra UI** | Component library | High | Accessible applications with custom design | Accessibility, composable components |
+| **Ant Design** | Enterprise design system | Medium | Data-heavy enterprise applications | Data visualization, form controls |
+| **React Bootstrap** | Bootstrap for React | Medium | Quick prototyping with familiar Bootstrap | Bootstrap components as React components |
 
-2. **JavaScript**: For the certification, you could:
-   - Use vanilla JavaScript with modern ES6+ features
-   - Implement a simple application with Vue.js (easiest learning curve)
-   - Use React for a more complex single-page application
+### Vue-Based Component Libraries
 
-### For Career Development (2025 perspective)
+| Library | Type | Customization | Best For | Key Features |
+|---------|------|--------------|----------|--------------|
+| **Vuetify** | Material Design | Medium | Applications following Material Design | Comprehensive, well-documented |
+| **PrimeVue** | Enterprise UI kit | High | Business applications | Rich set of components, themes |
+| **Quasar** | Full framework | High | Cross-platform Vue applications | Native mobile, desktop and web support |
 
-To position yourself well for a web development career:
+### Framework-Agnostic Libraries
 
-1. **Must know**:
-   - Solid vanilla JavaScript (ES6+) fundamentals
-   - At least one major JS framework (React, Vue, or Angular - with React having the most job opportunities)
-   - CSS fundamentals and responsive design principles
-   - One CSS framework or methodology (Tailwind, Bootstrap, or BEM methodology)
+| Library | Compatible With | Customization | Best For | Key Features |
+|---------|----------------|--------------|----------|--------------|
+| **Radix UI** | React | Very High | Accessible, custom-designed components | Headless, accessibility-focused primitives |
+| **Headless UI** | React, Vue | Very High | Completely custom styling with solid behavior | Unstyled, accessible component logic |
 
-2. **Nice to have**:
-   - TypeScript knowledge
-   - Experience with a meta-framework (Next.js is particularly valuable)
-   - State management solutions (Redux, Vuex, or similar)
+### Focus on shadcn/ui
 
-## How to Choose for Specific Projects
+**shadcn/ui** deserves special attention for your certification project as it represents a modern approach to component libraries:
+
+- **What it is**: Not a traditional component library you install via npm, but a collection of reusable components built with Radix UI and styled with Tailwind CSS
+- **Installation**: Components are copied directly into your project, using a CLI tool
+- **Customization**: Since the components live in your project, you have complete control to modify them
+- **Technology**: Built with React, Radix UI (for accessibility and behavior), and Tailwind CSS (for styling)
+- **Philosophy**: "Copy and paste components, not packages" - giving you ownership of the code
+
+#### Why shadcn/ui is Excellent for Your Certification
+
+1. **Modern Approach**: Shows your understanding of current frontend development practices
+2. **Accessibility**: Components follow accessibility best practices out of the box (mentioned in your certification requirements)
+3. **Customization**: Allows for completely custom designs while maintaining good UX patterns
+4. **Learning Value**: By having component code in your project, you can learn how well-structured components work
+5. **Size Optimization**: Only include the components you actually use, reducing bundle size
+
+#### How to Use shadcn/ui
+
+Basic installation steps (simplified):
+```bash
+# Create a new Next.js project
+npx create-next-app@latest my-app --typescript --tailwind --eslint
+
+# Add shadcn/ui CLI
+npx shadcn-ui@latest init
+
+# Add components as needed
+npx shadcn-ui@latest add button
+npx shadcn-ui@latest add card
+# etc.
+```
+
+Then you can import and use the components:
+```jsx
+import { Button } from "@/components/ui/button"
+
+export default function MyComponent() {
+  return (
+    <Button variant="outline">Click me</Button>
+  )
+}
+```
+
+#### Example Component Ecosystem
+
+For a certification project, a good selection of shadcn/ui components might include:
+- Button, Card, Dialog, Dropdown Menu
+- Form components (Input, Checkbox, Select)
+- Tabs, Accordion
+- Toast notifications
+
+These could be styled to match your project's design while maintaining proper accessibility and behavior.
+
+#### How shadcn/ui Compares to Traditional Libraries
+
+| Aspect | shadcn/ui | Traditional Component Libraries |
+|--------|-----------|--------------------------------|
+| **Installation** | Copy components to your project | Install package via npm/yarn |
+| **Updates** | Manual (copy new versions when needed) | Automatic via package updates |
+| **Customization** | Complete (code is in your project) | Limited to provided APIs and theming |
+| **Bundle Size** | Only what you use | Often includes unused components |
+| **Learning** | See and modify all component code | Black box unless you read source |
+| **Certification Value** | High (shows modern approach) | Medium (shows knowledge of ecosystem) |
 
 ### Small Business Website or Brochure Site
 - **CSS**: Bootstrap or Tailwind CSS
