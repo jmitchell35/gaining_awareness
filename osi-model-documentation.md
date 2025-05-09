@@ -6,6 +6,24 @@ The Open Systems Interconnection (OSI) model is a conceptual framework that stan
 
 Think of the OSI model as a building with seven floors, where each floor has a specific role in getting your data from one computer to another across a network. This document will take you through each layer of the OSI model, explain its purpose, and detail the protocols that operate within it.
 
+```
+┌───────────────────────┐
+│  7. APPLICATION       │ End-user processes (HTTP, SMTP, FTP)
+├───────────────────────┤
+│  6. PRESENTATION      │ Data formatting and encryption (TLS, MIME)
+├───────────────────────┤
+│  5. SESSION           │ Inter-host communication (NetBIOS, RTP)
+├───────────────────────┤
+│  4. TRANSPORT         │ End-to-end connections (TCP, UDP)
+├───────────────────────┤
+│  3. NETWORK           │ Path determination (IP, ICMP)
+├───────────────────────┤
+│  2. DATA LINK         │ Physical addressing (Ethernet, ARP)
+├───────────────────────┤
+│  1. PHYSICAL          │ Media, signal and transmission (Cables, Wi-Fi)
+└───────────────────────┘
+```
+
 ## Why the OSI Model Matters
 
 - **Standardization**: Provides a standard for different computer systems to communicate with each other
@@ -16,6 +34,38 @@ Think of the OSI model as a building with seven floors, where each floor has a s
 ## The Seven Layers of the OSI Model
 
 The OSI model consists of seven layers, each with distinct functions. Data flows down through the layers on the sending device and up through the layers on the receiving device.
+
+### Data Encapsulation Through OSI Layers
+
+```
+┌─────────────────┐
+│   APPLICATION   │ Data
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│  PRESENTATION   │ Data
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│     SESSION     │ Data
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│    TRANSPORT    │ Segment = Transport Header + Data
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│     NETWORK     │ Packet = Network Header + Segment
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│    DATA LINK    │ Frame = DL Header + Packet + DL Trailer
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│    PHYSICAL     │ Bits (101010101)
+└─────────────────┘
+```
 
 Let's explore each layer from bottom to top:
 
@@ -227,6 +277,38 @@ The Application layer is the OSI layer closest to the end user. It provides netw
 
 When data is sent from one device to another:
 
+```
+SENDER                                    RECEIVER
+┌─────────────────┐                      ┌─────────────────┐
+│   APPLICATION   │                      │   APPLICATION   │
+└────────┬────────┘                      └────────▲────────┘
+         │ Encapsulation                          │ Decapsulation
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│  PRESENTATION   │                      │  PRESENTATION   │
+└────────┬────────┘                      └────────▲────────┘
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│     SESSION     │                      │     SESSION     │
+└────────┬────────┘                      └────────▲────────┘
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│    TRANSPORT    │                      │    TRANSPORT    │
+└────────┬────────┘                      └────────▲────────┘
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│     NETWORK     │                      │     NETWORK     │
+└────────┬────────┘                      └────────▲────────┘
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│    DATA LINK    │                      │    DATA LINK    │
+└────────┬────────┘                      └────────▲────────┘
+         ▼                                        │
+┌─────────────────┐                      ┌─────────────────┐
+│    PHYSICAL     │ ─────► Bits ─────►  │    PHYSICAL     │
+└─────────────────┘                      └─────────────────┘
+```
+
 1. The process begins at the Application layer of the sending device
 2. Data moves down through the layers, with each layer adding its own information (headers or trailers)
 3. At the Physical layer, the data is transmitted as bits across the network medium
@@ -238,14 +320,70 @@ This process is known as encapsulation (down the stack) and decapsulation (up th
 
 ## Practical Applications of the OSI Model
 
+### Real-world Protocol Mapping
+
+The following diagram shows how common networking protocols and technologies map to the OSI model:
+
+```
+OSI LAYER                PROTOCOLS/TECHNOLOGIES
+┌─────────────────────┐  ┌─────────────────────────────────────┐
+│  7. APPLICATION     │  │ HTTP, HTTPS, FTP, SMTP, DNS, DHCP,  │
+│                     │  │ Telnet, SSH, SNMP                   │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  6. PRESENTATION    │  │ TLS/SSL, MIME, ASCII, JPEG, GIF,    │
+│                     │  │ MPEG, PGP                           │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  5. SESSION         │  │ NetBIOS, RTP, SOCKS, SAP            │
+│                     │  │                                     │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  4. TRANSPORT       │  │ TCP, UDP, SCTP, QUIC                │
+│                     │  │                                     │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  3. NETWORK         │  │ IPv4, IPv6, ICMP, IPsec, OSPF, BGP  │
+│                     │  │                                     │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  2. DATA LINK       │  │ Ethernet, ARP, HDLC, PPP, L2TP,     │
+│                     │  │ MAC, Switches, Bridges              │
+├─────────────────────┤  ├─────────────────────────────────────┤
+│  1. PHYSICAL        │  │ Ethernet (802.3), Wi-Fi (802.11),   │
+│                     │  │ Cables, Hubs, Repeaters, Bluetooth  │
+└─────────────────────┘  └─────────────────────────────────────┘
+```
+
 ### Troubleshooting Network Issues
 The OSI model provides a systematic approach to network troubleshooting:
 
-- **Physical Layer Issues**: Cable problems, hardware failures
-- **Data Link Layer Issues**: MAC address conflicts, NIC failures
-- **Network Layer Issues**: Routing problems, IP configuration errors
-- **Transport Layer Issues**: Port conflicts, connection problems
-- **Upper Layer Issues**: Application configuration, protocol compatibility
+| Layer | Common Issues | Troubleshooting Tools | Symptoms |
+|-------|---------------|----------------------|----------|
+| **Physical** | Cable problems, hardware failures | Cable tester, multimeter | No connectivity, link lights off |
+| **Data Link** | MAC address conflicts, NIC failures | arp -a, ifconfig/ipconfig | Can't reach local network |
+| **Network** | Routing, IP configuration | ping, traceroute | Can't reach remote networks |
+| **Transport** | Port conflicts, connection issues | netstat, port scanners | Services unavailable |
+| **Session+** | Authentication, session establishment | Application logs | Can't establish/maintain sessions |
+| **Presentation+** | Encoding, encryption | SSL checkers, encoding tools | Garbled content, certificate errors |
+| **Application** | Application config, protocol issues | Application diagnostics | Software failures |
+
+#### OSI Troubleshooting Flowchart
+
+```
+START
+  ↓
+Is Physical connectivity OK? → NO → Check cables, hardware, connections
+  ↓ YES
+Can you reach local devices? → NO → Check Data Link (MAC, NIC, switches)
+  ↓ YES
+Can you ping remote IPs? → NO → Check Network (IP, routing, gateways)
+  ↓ YES
+Can you connect to services? → NO → Check Transport (ports, firewalls)
+  ↓ YES
+Sessions established OK? → NO → Check Session (authentication)
+  ↓ YES
+Data displayed correctly? → NO → Check Presentation (encoding)
+  ↓ YES
+Application functioning? → NO → Check Application (software, config)
+  ↓ YES
+PROBLEM SOLVED
+```
 
 ### Network Design
 When designing networks, engineers use the OSI model to ensure all necessary components are addressed:
@@ -258,7 +396,28 @@ When designing networks, engineers use the OSI model to ensure all necessary com
 
 ## The OSI Model vs. TCP/IP Model
 
-While the OSI model is the standard conceptual model, the TCP/IP model is what's actually implemented in most networks today. The TCP/IP model condenses the OSI layers:
+While the OSI model is the standard conceptual model, the TCP/IP model is what's actually implemented in most networks today. Here's a comparison:
+
+```
+┌───────────────────┐             ┌───────────────────┐
+│   APPLICATION     │             │                   │
+├───────────────────┤             │                   │
+│   PRESENTATION    │             │    APPLICATION    │
+├───────────────────┤             │                   │
+│     SESSION       │             │                   │
+├───────────────────┤             ├───────────────────┤
+│    TRANSPORT      │             │     TRANSPORT     │
+├───────────────────┤             ├───────────────────┤
+│     NETWORK       │             │     INTERNET      │
+├───────────────────┤             ├───────────────────┤
+│    DATA LINK      │             │                   │
+├───────────────────┤             │   NETWORK ACCESS  │
+│     PHYSICAL      │             │                   │
+└───────────────────┘             └───────────────────┘
+       OSI Model                    TCP/IP Model
+```
+
+The TCP/IP model condenses the OSI layers:
 
 - **Network Access Layer**: Combines OSI Physical and Data Link layers
 - **Internet Layer**: Corresponds to OSI Network layer
@@ -269,45 +428,38 @@ Understanding both models is important for networking professionals.
 
 ## Summary: Most Important Protocols by Layer
 
-### Physical Layer (Layer 1)
-- Ethernet (IEEE 802.3)
-- Wi-Fi (IEEE 802.11)
-- USB
-- Bluetooth
-
-### Data Link Layer (Layer 2)
-- Ethernet
-- ARP
-- MAC
-- PPP
-
-### Network Layer (Layer 3)
-- IP (IPv4/IPv6)
-- ICMP
-- IPsec
-- OSPF, BGP (routing protocols)
-
-### Transport Layer (Layer 4)
-- TCP
-- UDP
-- QUIC
-
-### Session Layer (Layer 5)
-- NetBIOS
-- RTP
-- SOCKS
-
-### Presentation Layer (Layer 6)
-- TLS/SSL
-- MIME
-- PGP
-
-### Application Layer (Layer 7)
-- HTTP/HTTPS
-- DNS
-- SMTP/POP3/IMAP
-- FTP
-- SSH
+| Layer | Key Protocols | Primary Functions |
+|-------|--------------|-------------------|
+| **7. Application** | HTTP/HTTPS | Web browsing |
+|  | DNS | Name resolution |
+|  | SMTP/POP3/IMAP | Email |
+|  | FTP | File transfer |
+|  | SSH | Secure remote access |
+|  | DHCP | IP address assignment |
+| **6. Presentation** | TLS/SSL | Encryption/Security |
+|  | MIME | Data format conversion |
+|  | PGP | Encryption |
+|  | ASCII | Character encoding |
+| **5. Session** | NetBIOS | Session management |
+|  | RTP | Media streaming |
+|  | SOCKS | Proxy services |
+|  | PPTP | VPN tunneling |
+| **4. Transport** | TCP | Reliable, connection-oriented |
+|  | UDP | Fast, connectionless |
+|  | QUIC | Fast, secure web transport |
+|  | SCTP | Combined TCP/UDP features |
+| **3. Network** | IPv4/IPv6 | Logical addressing |
+|  | ICMP | Network diagnostics |
+|  | IPsec | Network security |
+|  | OSPF, BGP | Routing |
+| **2. Data Link** | Ethernet | LAN connectivity |
+|  | ARP | Address resolution |
+|  | MAC | Physical addressing |
+|  | PPP | Point-to-point links |
+| **1. Physical** | Ethernet standards | Wired connectivity |
+|  | Wi-Fi (802.11) | Wireless connectivity |
+|  | USB | Device connectivity |
+|  | Bluetooth | Short-range wireless |
 
 ## Conclusion
 
