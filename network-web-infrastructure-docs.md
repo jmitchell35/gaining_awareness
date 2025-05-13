@@ -429,16 +429,16 @@ When you type a website address in your browser, here's what happens step-by-ste
 1. **User Request**: You enter "www.example.com" in your browser
 2. **Local Cache Check**: Your computer first checks if it already knows the IP address from previous visits
 3. **Resolver Query**: If not found locally, your computer asks a recursive DNS resolver (typically operated by your ISP or services like Google's 8.8.8.8)
-4. **Hierarchical Resolution Process**: The resolver then follows a series of steps:
-   - If the resolver doesn't know the answer, it starts at the root servers
-   - The root server directs the resolver to the .com TLD server
-   - The .com TLD server directs the resolver to the authoritative server for example.com
-   - The authoritative server provides the IP address for www.example.com
-5. **Authoritative Answer**: The final answer comes from the authoritative nameserver that has been officially delegated responsibility for that domain
+4. **Hierarchical Resolution Process**: The resolver then follows a series of steps through the DNS hierarchy:
+   - If the resolver doesn't know the answer, it starts by querying the root servers
+   - The root server doesn't know the specific answer but directs the resolver to the appropriate TLD server (e.g., .com TLD server)
+   - The .com TLD server doesn't know the specific answer either but directs the resolver to the authoritative nameservers for example.com
+   - The authoritative nameserver for example.com provides the actual IP address for www.example.com
+5. **Authoritative Answer**: The final answer comes from the authoritative nameserver that has been officially delegated responsibility for that specific domain (not from root or TLD servers)
 6. **Result Returned**: The IP address is returned through the chain back to your computer
 7. **Connection Established**: Your browser uses this IP address to connect to the web server
 
-The term "authoritative answer" means the response came from a server that has official authority over that domain's records, rather than from cached or second-hand information.
+The term "authoritative answer" means the response came from a server that has been officially designated as the authority for that specific domain's records, rather than from cached or second-hand information. Root servers and TLD servers are authoritative only for their respective zones, not for specific domain names.
 
 ### DNS System Hierarchy: Who Controls What
 
@@ -469,6 +469,9 @@ Contrary to common misconception, the Root DNS system is not 13 physical servers
 **Do they exist as a single coherent entity?**
 No, the system is intentionally distributed and decentralized. While there are only 13 root server IP addresses visible from any single location at any given time, these addresses point to a global network of servers spanning all populated continents. Together, these 13 root identities represent over 1,500 individual servers, each providing identical information from the root zone to DNS resolvers.
 
+**What is their role in the DNS hierarchy?**
+Root servers are authoritative only for the root zone itself. They don't provide IP addresses for specific domains but instead direct resolvers to the appropriate TLD servers. They form the critical first step in the DNS resolution process.
+
 #### TLD Servers
 
 **Who operates them?**
@@ -487,6 +490,9 @@ Like root servers, TLD servers use anycast technology to distribute servers glob
 **Do they exist as single coherent entities?**
 Each TLD is managed by a specific registry operator (a single responsible entity), but the physical implementation of each TLD's DNS service is distributed across multiple servers and locations.
 
+**What is their role in the DNS hierarchy?**
+TLD servers are authoritative only for their specific TLD zone (like .com or .org). They don't provide IP addresses for specific domains but instead direct resolvers to the appropriate authoritative nameservers for a given domain within their TLD.
+
 #### Authoritative DNS Servers
 
 **Who operates them?**
@@ -498,6 +504,9 @@ Authoritative DNS servers are operated by:
 
 **Domain registration connection:**
 This directly relates to domain uniqueness and registration. Domain names must be unique within their TLD, and they are registered through domain registrars accredited by the relevant TLD registry. When you register a domain, you specify which authoritative DNS servers will be responsible for your domain's DNS records. The registrar communicates this information to the TLD registry, which then updates its servers to point to your authoritative DNS servers.
+
+**What is their role in the DNS hierarchy?**
+Authoritative nameservers are the only servers that provide the actual, authoritative DNS records (like A, CNAME, MX records) for specific domain names. They are the final authority on what IP address corresponds to a given domain name. While root servers and TLD servers are part of the lookup process, only these authoritative nameservers provide the actual answers for specific domains.
 
 #### Recursive DNS Resolvers
 
