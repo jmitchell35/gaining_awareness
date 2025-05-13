@@ -52,12 +52,12 @@ Most network communications use multiple protocols working together in layers. T
 
 **Web Browsing**:
 - **HTTP (Hypertext Transfer Protocol)**: Transfers web page content
-- **HTTPS**: Secure version of HTTP using encryption
-- **TLS/SSL**: Provides security for HTTP and other protocols
+- **HTTPS (Hypertext Transfer Protocol Secure)**: Secure version of HTTP using encryption
+- **TLS/SSL (Transport Layer Security/Secure Sockets Layer)**: Provides security for HTTP and other protocols
 
 **Email**:
 - **SMTP (Simple Mail Transfer Protocol)**: Sends emails
-- **POP3 (Post Office Protocol)**: Retrieves emails (older)
+- **POP3 (Post Office Protocol version 3)**: Retrieves emails (older)
 - **IMAP (Internet Message Access Protocol)**: Manages emails on the server (modern)
 
 **File Transfer**:
@@ -265,12 +265,95 @@ In a web server environment, TCP/IP enables:
 Understanding TCP/IP is fundamental to troubleshooting network issues, configuring servers, and designing robust web infrastructure.
 
 ### What is an Internet Protocol (IP) Port?
-An IP port is a 16-bit number (0-65535) that identifies a specific process or service on a server. It works alongside the IP address to direct traffic to the correct application or service on a networked device.
 
-Port numbers are categorized into three ranges:
-- **Well-known ports**: 0-1023 (HTTP: 80, HTTPS: 443, FTP: 21, SSH: 22)
-- **Registered ports**: 1024-49151 (MySQL: 3306, PostgreSQL: 5432)
-- **Dynamic/Private ports**: 49152-65535 (Typically assigned dynamically)
+An IP port is a 16-bit number (ranging from 0 to 65535) that identifies a specific process or service on a networked device. While IP addresses identify devices on a network, ports identify specific services or applications running on those devices.
+
+#### How Ports Work
+
+Think of an IP address like a building's street address, and ports like individual apartment numbers within that building. The combination of IP address and port number creates a complete "location" called a socket:
+
+```
+Socket = IP Address + Port Number
+Example: 192.168.1.1:80
+```
+
+When data arrives at a device, the operating system examines the destination port number to determine which application or service should receive the data.
+
+#### Port Categories
+
+Ports are divided into three ranges:
+
+1. **Well-Known Ports (0-1023)**
+   - Reserved for common, standardized services
+   - Requires administrative privileges to use on most systems
+   - Examples:
+     - **20/21**: FTP (File Transfer Protocol)
+     - **22**: SSH (Secure Shell)
+     - **25**: SMTP (Simple Mail Transfer Protocol, for sending email)
+     - **53**: DNS (Domain Name System)
+     - **80**: HTTP (Hypertext Transfer Protocol)
+     - **443**: HTTPS (HTTP Secure)
+
+2. **Registered Ports (1024-49151)**
+   - Registered with IANA (Internet Assigned Numbers Authority)
+   - Used by specific applications but not as strictly controlled
+   - Examples:
+     - **1433**: Microsoft SQL Server
+     - **3306**: MySQL Database
+     - **3389**: Remote Desktop Protocol (RDP)
+     - **5432**: PostgreSQL Database
+     - **8080**: Alternative HTTP port, often used for web proxies
+
+3. **Dynamic/Private Ports (49152-65535)**
+   - Not controlled by any authority
+   - Available for temporary use by applications
+   - Typically used for outgoing connections or temporary services
+   - Example: When your browser connects to a website, it might use port 54321 as its source port
+
+#### Ports in Web Infrastructure
+
+**Web Server Ports**:
+- Port 80: Standard for HTTP web traffic
+- Port 443: Standard for HTTPS (encrypted) web traffic
+
+**Database Ports**:
+- Port 3306: MySQL
+- Port 5432: PostgreSQL
+- Port 27017: MongoDB
+
+**Application Server Ports**:
+- Port 8000/8080: Common for development web servers
+- Port 8443: Often used for secure application servers
+- Port 9000: Used by many application frameworks
+
+#### How Ports Enable Multiple Services
+
+Ports allow a single server to run multiple services simultaneously. For example, a single server might run:
+- A web server on port 80 and 443
+- A database on port 3306
+- An email server on ports 25, 110, and 143
+- SSH access on port 22
+
+Without ports, each service would require a separate IP address.
+
+#### Practical Example: Web Request Flow
+
+When you type "https://www.example.com" in your browser:
+
+1. Your browser determines this is an HTTPS request that uses port 443
+2. It connects to the server's IP address on port 443
+3. The server's operating system directs the connection to the web server application listening on port 443
+4. The web server processes the request and sends a response
+5. The response returns to your browser on the dynamic port it opened for this connection
+
+#### Security and Ports
+
+Ports play a crucial role in network security:
+- Firewalls often block specific ports to prevent unwanted access
+- Security scans check for unnecessarily open ports
+- Changing default ports can help prevent automated attacks
+
+Understanding ports is essential for configuring server applications, setting up firewalls, and troubleshooting network connectivity issues.
 
 ## Servers
 
@@ -303,7 +386,7 @@ Servers are typically housed in:
 - Virtual servers hosted on distributed physical hardware
 - Offer scalability and flexibility
 - Reduce need for physical maintenance
-- Examples: AWS, Google Cloud, Microsoft Azure
+- Examples: AWS (Amazon Web Services), Google Cloud, Microsoft Azure
 
 ## Web Servers
 
@@ -322,9 +405,9 @@ The primary functions of a web server include:
 - Handling concurrent connections
 
 ### Popular Web Servers
-- **Nginx**: High-performance web server, reverse proxy, and load balancer
-- **Apache**: Widely used web server with extensive feature set
-- **Microsoft IIS**: Windows-based web server
+- **Nginx** (pronounced "engine-x"): High-performance web server, reverse proxy, and load balancer
+- **Apache HTTP Server**: Widely used web server with extensive feature set
+- **Microsoft IIS** (Internet Information Services): Windows-based web server
 - **LiteSpeed**: High-performance alternative to Apache
 
 ## DNS (Domain Name System)
@@ -335,7 +418,7 @@ DNS (Domain Name System) translates human-readable domain names (like www.exampl
 #### DNS Hierarchy
 The DNS system is organized as a hierarchical tree structure:
 
-1. **Root DNS Servers**: At the top of the hierarchy, these servers know information about the top-level domain (TLD) servers
+1. **Root DNS Servers**: At the top of the hierarchy, these servers know information about the Top-Level Domain (TLD) servers
 2. **TLD Servers**: Manage information for domains with a specific extension (.com, .org, .net, etc.)
 3. **Authoritative DNS Servers**: Hold the actual DNS records for specific domains
 4. **Recursive DNS Resolvers**: The software that queries the DNS hierarchy on behalf of users
@@ -356,6 +439,88 @@ When you type a website address in your browser, here's what happens step-by-ste
 7. **Connection Established**: Your browser uses this IP address to connect to the web server
 
 The term "authoritative answer" means the response came from a server that has official authority over that domain's records, rather than from cached or second-hand information.
+
+### DNS System Hierarchy: Who Controls What
+
+Understanding who controls each level of the DNS hierarchy helps clarify how the entire system functions as a distributed but coordinated global network.
+
+#### Root DNS Servers
+
+**Who operates them?**
+The Root DNS servers are not controlled by a single entity but are managed by 12 independent organizations that collectively operate the 13 logical root server identities (labeled A through M). As of May 2025, there are approximately 1,952 physical server instances distributed globally.
+
+These operators include:
+- Verisign (operates two root servers - A and J)
+- University of Southern California (ISI)
+- Cogent Communications
+- University of Maryland
+- NASA (National Aeronautics and Space Administration, Ames Research Center)
+- Internet Systems Consortium (ISC)
+- U.S. Department of Defense
+- U.S. Army Research Lab
+- Netnod
+- RIPE NCC (Réseaux IP Européens Network Coordination Centre)
+- ICANN (Internet Corporation for Assigned Names and Numbers, operates L-Root)
+- WIDE Project
+
+**Where are they located?**
+Contrary to common misconception, the Root DNS system is not 13 physical servers but rather 13 logical identities implemented using anycast addressing. This allows each logical server to exist as hundreds of physical servers globally distributed. The system uses anycast routing to direct requests based on load and proximity, making it highly redundant and improving performance worldwide.
+
+**Do they exist as a single coherent entity?**
+No, the system is intentionally distributed and decentralized. While there are only 13 root server IP addresses visible from any single location at any given time, these addresses point to a global network of servers spanning all populated continents. Together, these 13 root identities represent over 1,500 individual servers, each providing identical information from the root zone to DNS resolvers.
+
+#### TLD Servers
+
+**Who operates them?**
+TLD servers are operated by various registry operators who have been delegated authority by ICANN:
+- Verisign operates .com and .net
+- Public Interest Registry operates .org
+- AFNIC operates .fr (France)
+- Nominet operates .uk (United Kingdom)
+- auDA operates .au (Australia)
+
+Each TLD has its own designated registry operator responsible for maintaining the authoritative DNS servers for that specific top-level domain.
+
+**Where are they located?**
+Like root servers, TLD servers use anycast technology to distribute servers globally. Each registry operator maintains their own infrastructure with multiple instances around the world for redundancy and performance.
+
+**Do they exist as single coherent entities?**
+Each TLD is managed by a specific registry operator (a single responsible entity), but the physical implementation of each TLD's DNS service is distributed across multiple servers and locations.
+
+#### Authoritative DNS Servers
+
+**Who operates them?**
+Authoritative DNS servers are operated by:
+- Domain owners themselves
+- Domain registrars (like GoDaddy, Namecheap)
+- Specialized DNS hosting providers (like Cloudflare, AWS Route 53)
+- Web hosting companies that include DNS services
+
+**Domain registration connection:**
+This directly relates to domain uniqueness and registration. Domain names must be unique within their TLD, and they are registered through domain registrars accredited by the relevant TLD registry. When you register a domain, you specify which authoritative DNS servers will be responsible for your domain's DNS records. The registrar communicates this information to the TLD registry, which then updates its servers to point to your authoritative DNS servers.
+
+#### Recursive DNS Resolvers
+
+**Software implementations:**
+There are multiple implementations of recursive DNS resolver software:
+- BIND (Berkeley Internet Name Domain) - The most widely used DNS software
+- Unbound - A validating, recursive DNS resolver
+- PowerDNS Recursor - A high-performance resolver
+- Knot Resolver - A modern open-source resolver
+- dnsmasq - Lightweight resolver often used in small networks and routers
+- Microsoft DNS - Included with Windows Server
+
+Recursive resolvers need a "root hints file" containing the names and IP addresses of root servers to bootstrap the DNS resolution process. For many DNS resolver software, this list comes built into the software.
+
+**Who operates recursive resolvers?**
+These resolvers can be:
+- Run by ISPs (Internet Service Providers) for their customers
+- Operated as public services (like Google's 8.8.8.8, Cloudflare's 1.1.1.1, Quad9's 9.9.9.9)
+- Deployed within enterprise networks
+- Part of home routers/gateways
+- Run directly on end-user devices
+
+The resolvers cache results to improve performance and reduce load on authoritative servers.
 
 ### Main DNS Record Types
 
@@ -608,7 +773,7 @@ Focuses on the performance and availability of software applications:
 
 #### Server Monitoring
 Tracks the health and performance of physical or virtual servers:
-- CPU usage
+- CPU (Central Processing Unit) usage
 - Memory utilization
 - Disk space
 - Network traffic
@@ -642,7 +807,7 @@ Measures the throughput of a web server by tracking:
 ### Popular Monitoring Tools
 
 #### NewRelic
-- Comprehensive application performance monitoring
+- Comprehensive APM (Application Performance Monitoring)
 - JavaScript-based browser monitoring
 - Real-time analytics and alerting
 - Visualizations and dashboards
@@ -902,7 +1067,7 @@ A SPOF is any component whose failure would cause the entire system to fail. In 
 QPS measures the rate of queries or requests handled by a system per second. It's a key performance metric for:
 - Web servers
 - Database servers
-- API endpoints
+- API (Application Programming Interface) endpoints
 - Load balancers
 
 ### High Availability
