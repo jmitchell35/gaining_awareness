@@ -531,6 +531,64 @@ These resolvers can be:
 
 The resolvers cache results to improve performance and reduce load on authoritative servers.
 
+### Self-Hosting DNS Servers
+
+While many organizations use managed DNS services provided by registrars or cloud providers, some enterprises choose to host and manage their own authoritative DNS servers. Here's what's involved in self-hosting DNS:
+
+#### DNS Server Software Options
+
+**BIND (Berkeley Internet Name Domain)**:
+- Industry standard, open-source DNS server software
+- Primarily runs on Linux/Unix systems
+- Configuration complexity level: Moderate to high
+- Uses text-based configuration files with specific syntax
+- Requires understanding of zone files and resource records
+- Needs regular security updates and monitoring
+
+**Microsoft DNS**:
+- Integrated with Windows Server and Active Directory
+- More GUI-driven, less text configuration
+- Complexity level: Moderate
+- More intuitive for organizations already using Windows infrastructure
+- Offers integration with other Microsoft services
+
+**Other Options**:
+- PowerDNS: Flexible, scalable with database backends
+- Knot DNS: High-performance authoritative server
+- NSD (Name Server Daemon): Focused on security and stability
+
+#### Key Considerations for Self-Hosting DNS
+
+**Technical Requirements**:
+- Dedicated servers or virtual machines
+- Redundant systems for high availability (at least two servers)
+- Regular backups of configuration and zone data
+- Monitoring systems to alert on issues
+
+**Operational Challenges**:
+- Maintaining 24/7 availability (DNS is critical infrastructure)
+- Keeping up with security patches and best practices
+- Managing zone transfers between primary and secondary servers
+- Handling DNSSEC if implemented
+
+**Security Concerns**:
+- DNS servers are common attack targets
+- Need protection against DNS amplification attacks
+- Preventing cache poisoning and other DNS-specific vulnerabilities
+- Implementing proper access controls
+
+**When Self-Hosting Makes Sense**:
+- Large enterprises with specialized DNS needs
+- Organizations with strict control requirements
+- Environments with substantial internal DNS requirements
+- When integration with internal systems is critical
+
+**When Managed DNS is Preferable**:
+- Small to medium organizations with limited IT resources
+- When global distribution and high performance are needed
+- When DDoS protection is a priority
+- To reduce operational overhead
+
 ### Main DNS Record Types
 
 DNS records are stored in zone files on authoritative DNS servers. Each record type serves a specific purpose in the DNS system. Let's break down the common record format first:
@@ -981,6 +1039,57 @@ A firewall is a network security device that monitors and filters incoming and o
 - **Perimeter Firewalls**: Protect the boundary between internal and external networks
 - **Internal Firewalls**: Segment different parts of internal networks
 - **Cloud Firewalls**: Protect cloud-based resources
+
+### DMZ (Demilitarized Zone)
+
+A DMZ is a segregated network segment that sits between an organization's trusted internal network and the untrusted external network (the internet). It serves as a buffer zone for hosting public-facing services without exposing the internal network.
+
+#### Purpose of a DMZ
+- Adds an additional security layer between external users and internal resources
+- Contains potential security breaches by isolating public-facing services
+- Creates a buffer zone where additional security controls can be implemented
+- Allows external access to specific services without exposing the internal network
+
+#### Components Typically Placed in a DMZ
+- **Public-facing web servers**
+- **Reverse proxies**
+- **External-facing DNS servers**
+- **Email gateways and spam filters**
+- **VPN endpoints**
+- **FTP servers**
+- **Web Application Firewalls (WAFs)**
+
+#### Typical DMZ Network Architecture
+```
+Internet → External Firewall → DMZ (Public-facing Services) → Internal Firewall → Internal Network
+```
+
+### Reverse Proxies
+
+A reverse proxy is a server that sits between external users and your internal application servers, forwarding client requests to the appropriate backend servers.
+
+#### Role in Security Architecture
+- Typically deployed in the DMZ
+- Acts as an intermediary between external users and internal application servers
+- Provides a single controlled entry point to internal applications
+- Hides internal network structure and IP addresses from external users
+- Can perform TLS/SSL termination in the DMZ
+- Filters and inspects traffic before it reaches internal servers
+
+#### Popular Reverse Proxy Solutions
+- **Nginx**: Lightweight, high-performance
+- **HAProxy**: Excellent for load balancing
+- **Apache with mod_proxy**: Feature-rich option
+- **F5 BIG-IP**: Enterprise-grade solution
+- **Cloudflare/Akamai Edge**: Cloud-based options
+
+#### Benefits in Web Infrastructure
+- **Security**: Hides backend details, filters malicious requests
+- **Load balancing**: Distributes traffic among multiple backend servers
+- **Caching**: Improves performance by storing copies of resources
+- **SSL termination**: Centralizes certificate management
+- **Compression**: Reduces bandwidth usage
+- **Content filtering**: Controls what content passes through
 
 ### HTTPS and SSL/TLS
 
