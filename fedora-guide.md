@@ -568,18 +568,34 @@ Apply themes using GNOME Tweaks.
 
 #### Essential GNOME Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| Super (Windows Key) | Activities overview |
-| Super + A | Applications menu |
-| Super + Tab | Switch between applications |
-| Super + ` | Switch between windows of the same application |
-| Super + Arrow Keys | Snap windows to edges |
-| Super + L | Lock screen |
-| Super + V | Notification center |
-| Alt + F2 | Run command dialog |
-| Ctrl + Alt + T | Open terminal |
-| Super + Space | Switch keyboard layouts |
+| Shortcut | Action | Windows Equivalent |
+|----------|--------|-------------------|
+| Ctrl + Alt + T | Open terminal | None (PowerShell/CMD shortcuts) |
+| Super (Windows Key) | Activities overview | Windows key (Start menu) |
+| Super + A | Applications menu | Windows key + Q (Search) |
+| Super + Tab | Switch between applications | Alt + Tab |
+| Super + ` | Switch between windows of the same application | Alt + ` (less common in Windows) |
+| Super + Arrow Keys | Snap windows to edges | Windows key + Arrow keys |
+| Super + L | Lock screen | Windows key + L |
+| Super + V | Notification center | Windows key + A |
+| Alt + F2 | Run command dialog | Windows key + R |
+| Alt + F4 | Close window | Alt + F4 |
+| Alt + Tab | Switch between windows | Alt + Tab |
+| Ctrl + Alt + Down/Up | Switch workspaces | None (Virtual Desktops in Windows 10+) |
+| Ctrl + Alt + Shift + Arrow | Move window to another workspace | Windows key + Ctrl + Arrow (Windows 10+) |
+| Super + Space | Switch keyboard layouts | Alt + Shift |
+| Print Screen | Take screenshot of entire screen | Print Screen |
+| Alt + Print Screen | Take screenshot of current window | Alt + Print Screen |
+| Shift + Print Screen | Take screenshot of selected area | Windows key + Shift + S |
+| Ctrl + Alt + Backspace | Force restart X Server (emergency use) | Ctrl + Alt + Delete (Task Manager) |
+| Ctrl + Alt + F3-F6 | Switch to text console | None |
+| Ctrl + Alt + F2 | Return to graphical interface | None |
+
+> **For Windows Users**: 
+> - The "Super" key is the same as the Windows key on your keyboard 
+> - Opening a terminal with Ctrl+Alt+T is extremely useful and has no direct Windows equivalent
+> - Workspaces (virtual desktops) are more prominent in Linux and used frequently
+> - You can customize these shortcuts in Settings → Keyboard → Keyboard Shortcuts
 
 ### Alternative Desktop Environments
 
