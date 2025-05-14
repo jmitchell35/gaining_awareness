@@ -440,6 +440,146 @@ When you type a website address in your browser, here's what happens step-by-ste
 
 The term "authoritative answer" means the response came from a server that has been officially designated as the authority for that specific domain's records, rather than from cached or second-hand information. Root servers and TLD servers are authoritative only for their respective zones, not for specific domain names.
 
+### Complete DNS Resolution Flowchart
+
+For a more detailed understanding, here's a comprehensive view of the complete DNS resolution process including all caching layers:
+
+1. **Browser Request Initiated**
+   - User enters domain name (www.example.com) in browser
+   
+2. **Browser DNS Cache Check**
+   - Browser checks its internal DNS cache
+   - If found and not expired, skip to step 8
+   - Each browser maintains its own separate cache
+
+3. **Operating System Cache Check**
+   - OS checks its system-wide DNS cache
+   - If found and not expired, skip to step 8
+   - Used by all applications on the device
+   - Windows: View with `ipconfig /displaydns`
+
+4. **Router/Gateway Cache Check**
+   - Request goes to local network router/gateway (often ISP-provided)
+   - Router checks its local DNS cache
+   - If found and not expired, skip to step 8
+   - Benefits all devices on the local network
+
+5. **Recursive Resolver Selection**
+   - Based on network configuration, either:
+     - ISP's DNS resolvers (default)
+     - Public DNS (if manually configured)
+     - Corporate DNS (in business environments)
+
+6. **Recursive Resolver Processing**
+   - Resolver checks for full answer (A/AAAA records) in its cache
+   - If found and not expired, skip to step 7
+   - If not found, resolver initiates hierarchical resolution:
+     - **NS Record (NSSET) Caching**: Check if nameservers for this domain are cached
+       - If NS records are cached, go directly to authoritative servers
+     - **TLD/ccTLD Server Caching**: Check if TLD server info is cached
+       - If TLD server info is cached, skip root server query
+     - **Root Hints File**: If no cached information is available, use root hints file 
+       - Root hints contain addresses of root servers
+       - Not a true cache but a configuration file present in all resolvers
+     - Navigate down through hierarchy until reaching authoritative servers
+     - Get the final answer from authoritative nameservers
+
+7. **Answer Caching**
+   - Recursive resolver caches the answer according to TTL
+   - Router may cache the response
+   - Operating system caches the response
+   - Browser caches the response
+
+8. **Answer Returned to Application**
+   - IP address provided to browser
+   - Browser establishes connection to web server using this IP
+
+### DNS Caching Hierarchy
+
+DNS uses a multi-layered caching system to improve efficiency. From fastest to slowest:
+
+#### 1. Browser DNS Cache
+- Location: Within each web browser's memory
+- Scope: Only used by that specific browser
+- Speed: Fastest (1-5ms)
+- TTL: Usually shortest (minutes to hours)
+- Example: Chrome cache is separate from Firefox
+
+#### 2. Operating System DNS Cache
+- Location: OS level, managed by system resolver
+- Scope: Available to all applications on the device
+- Speed: Very fast (5-10ms)
+- Viewing: 
+  - Windows: `ipconfig /displaydns`
+  - Linux: Varies by distribution
+  - macOS: System resolver services
+
+#### 3. Router/Gateway DNS Cache
+- Location: Home/office router or ISP-provided gateway
+- Scope: All devices on the local network
+- Speed: Fast (10-20ms)
+- Benefit: Shared resource for all local devices
+- Often present in ISP-provided "boxes" (Livebox, Freebox, etc.)
+
+#### 4. Recursive Resolver Caching Layers
+
+**Full Answer Caching (A/AAAA records)**
+- Has complete IP address information cached
+- No external queries needed
+- Fastest external resolution possibility (~20-50ms)
+- Subject to TTL values set by authoritative servers
+
+**NS Record (NSSET) Caching**
+- Resolver has cached which nameservers are authoritative for a specific domain
+- Skips root and TLD servers
+- Goes directly to authoritative nameservers
+- Still requires external query (~40-100ms)
+
+**TLD/ccTLD Server Caching**
+- Resolver knows which servers handle specific TLDs or country-code TLDs (.com, .org, .fr, .uk, etc.)
+- Skips root servers
+- Queries TLD server, then authoritative servers
+- Requires two external queries (~60-150ms)
+- Separate caches for generic TLDs and country-code TLDs
+
+**Root Hints File**
+- Not truly a cache, but a configuration file that bootstraps the DNS system
+- Contains addresses of the 13 logical root servers
+- Present in every resolver implementation
+- Updated very rarely (only when root server information changes)
+- Used when other cached information is unavailable 
+- Enables full recursive resolution (~100-300ms)
+
+### DNS Resolution Time Comparison
+
+The caching hierarchy creates significant performance differences:
+
+**Full Recursive Lookup (Worst Case)**
+- Client to Local Resolver: ~5-20ms
+- Resolver to Root Server: ~20-100ms
+- Resolver to TLD Server: ~20-100ms
+- Resolver to Authoritative Server: ~20-200ms
+- Total time range: ~65-420ms
+
+**With NS Record Caching**
+- Client to Local Resolver: ~5-20ms
+- Resolver to Authoritative Server: ~20-200ms
+- Total time range: ~25-220ms
+- Time savings: ~40-200ms (approximately 50% faster)
+
+**With Full Answer Caching (at Resolver)**
+- Client to Local Resolver: ~5-20ms
+- Response from resolver cache: ~1-5ms
+- Total time range: ~6-25ms
+- Time savings: ~60-400ms (approximately 90% faster)
+
+**With Browser/OS Cache (Best Case)**
+- Response from local cache: ~1-5ms
+- Total time range: ~1-5ms
+- Time savings: ~65-415ms (approximately 99% faster)
+
+This multi-layered caching system makes the DNS resolution process extremely efficient despite its distributed hierarchical nature, with each layer progressively reducing query time.
+
 ### DNS System Hierarchy: Who Controls What
 
 Understanding who controls each level of the DNS hierarchy helps clarify how the entire system functions as a distributed but coordinated global network.
