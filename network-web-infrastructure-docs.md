@@ -217,8 +217,44 @@ The TCP/IP model organizes network communications into four distinct layers:
 
 **TCP Three-Way Handshake Process**:
 1. Client sends SYN (synchronize) packet to server
-2. Server responds with SYN-ACK (synchronize-acknowledge)
+2. Server responds with SYN-ACK (synchronize-acknowledge) 
 3. Client sends ACK (acknowledge), establishing the connection
+
+#### Why TCP Uses a Three-Way Handshake
+The TCP three-way handshake is one of the foundational mechanisms of internet reliability. It uses exactly three steps for several important technical reasons:
+
+**The Three Steps in Detail**:
+1. **SYN (Synchronize)**: Client → Server
+   * Client sends a packet with SYN flag set
+   * Includes initial sequence number (ISN) X chosen by client
+   * "I want to talk with you and my sequence numbers will start at X"
+2. **SYN-ACK (Synchronize-Acknowledge)**: Server → Client
+   * Server acknowledges client's sequence number (X+1)
+   * Server includes its own initial sequence number Y
+   * "I received your request with sequence X, and I'll respond with sequence Y"
+3. **ACK (Acknowledge)**: Client → Server
+   * Client acknowledges server's sequence number (Y+1)
+   * "I received your response with sequence Y, connection established"
+
+**Why Three Messages Are Necessary**:
+A three-way handshake is the **minimum required** to establish a reliable bidirectional connection because:
+1. **Bidirectional Verification**:
+   * TCP connections are full-duplex (data flows both ways)
+   * Both parties must confirm they can send AND receive
+   * Each direction needs its own sequence number initialization
+2. **Guarding Against Duplicates**:
+   * Two-way wouldn't confirm the client received the server's sequence number
+   * Without the third ACK, the server can't be sure its parameters were received
+   * This prevents duplicate connections and out-of-order packets
+3. **State Synchronization**:
+   * The three steps ensure both sides are in sync before data transmission
+   * Prevents "half-open" connections where one side thinks it's connected but the other doesn't
+
+**Why Not Two or Four Steps?**
+* **Two steps would be insufficient**: The client would have no way to acknowledge the server's sequence number
+* **Four steps would be redundant**: Once both sides have acknowledged each other's sequence numbers, the connection is established and additional handshaking would just add unnecessary delay
+
+This elegant three-step process ensures both reliability and efficiency in establishing TCP connections.
 
 **UDP (User Datagram Protocol)**:
 - **Connectionless**: No formal connection establishment
