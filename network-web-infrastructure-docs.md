@@ -4,6 +4,7 @@ This comprehensive guide covers the fundamental concepts of web infrastructure, 
 
 ## Table of Contents
 - [Network Basics](#network-basics)
+- [Complete Web Request Process](#complete-web-request-process)
 - [Servers](#servers)
 - [Web Servers](#web-servers)
 - [DNS (Domain Name System)](#dns-domain-name-system)
@@ -354,6 +355,97 @@ Ports play a crucial role in network security:
 - Changing default ports can help prevent automated attacks
 
 Understanding ports is essential for configuring server applications, setting up firewalls, and troubleshooting network connectivity issues.
+
+## Complete Web Request Process
+
+Before diving into specific components, it's important to understand the complete process that occurs when a user accesses a website. This sequential process involves multiple steps and protocols working together:
+
+### 1. DNS Resolution
+* **Purpose**: Translate human-readable domain names into machine-readable IP addresses
+* **Protocol**: DNS (Domain Name System) on port 53, primarily using UDP
+* **Process**: Multiple cache checks and potentially recursive lookups as detailed in the DNS section
+* **Output**: IP address of the requested web server
+* **Important Note**: No actual website content is transferred during this phase
+* **Timing**: Typically 1-400ms depending on cache status
+
+### 2. TCP Connection Establishment
+* **Purpose**: Create reliable communication channel between client and server
+* **Protocol**: TCP (Transmission Control Protocol)
+* **Process**: Three-way handshake (SYN, SYN-ACK, ACK)
+* **For HTTPS sites**: Additional TLS handshake for secure connection:
+   * Certificate exchange and validation
+   * Encryption method negotiation
+   * Symmetric key exchange
+* **Timing**: 50-200ms (more for HTTPS due to TLS handshake)
+
+### 3. HTTP Request
+* **Purpose**: Client specifies what resource it wants from the server
+* **Protocol**: HTTP or HTTPS on port 80 or 443
+* **Components**:
+   * Request method (GET, POST, etc.)
+   * Path to resource (/index.html)
+   * HTTP version
+   * Headers (User-Agent, Accept, Cookie, etc.)
+   * Optional body (for POST requests)
+* **Example**:
+
+```
+GET /index.html HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0
+Accept: text/html
+```
+
+* **Timing**: Typically 10-100ms to send request
+
+### 4. Server-Side Processing
+* **Purpose**: Generate or retrieve requested content
+* **Components potentially involved**:
+   * Web server (Nginx, Apache)
+   * Application server
+   * Database queries
+   * Caching layers
+   * Microservices
+* **Timing**: Highly variable (10ms-10s) depending on application complexity
+
+### 5. HTTP Response
+* **Purpose**: Deliver requested content back to client
+* **Components**:
+   * Status code (200 OK, 404 Not Found, etc.)
+   * Response headers
+   * Response body (HTML, JSON, images, etc.)
+* **Example**:
+
+```
+HTTP/1.1 200 OK
+Date: Wed, 14 May 2025 12:00:00 GMT
+Content-Type: text/html
+Content-Length: 1234
+
+<!DOCTYPE html>
+<html>...
+```
+
+* **Timing**: Depends on content size and connection speed
+
+### 6. Content Rendering
+* **Purpose**: Display content to user
+* **Process**:
+   * Parse HTML
+   * Load and execute CSS
+   * Execute JavaScript
+   * Render page visually
+   * Make additional requests for embedded resources (images, scripts, etc.)
+* **Timing**: 100ms-several seconds depending on page complexity
+
+### Key Insights
+* The entire process is sequential - each step must complete before the next can begin
+* DNS resolution is a prerequisite lookup service that occurs before any web content is transferred
+* Multiple network round-trips are required even for simple pages
+* Caching at various levels (DNS, TCP connections, HTTP responses) significantly improves performance
+* Modern websites typically trigger dozens of these complete request cycles for a single page load
+
+Understanding this complete cycle helps clarify how each component in web infrastructure contributes to the overall user experience.
 
 ## Servers
 
