@@ -27,8 +27,11 @@ This comprehensive guide covers the fundamental concepts of web infrastructure, 
   - [High Availability Architectures](#high-availability-architectures)
   - [Failure Detection and Recovery](#failure-detection-and-recovery)
   - [Distributed Consensus Systems](#distributed-consensus-systems)
+- [Content Delivery Networks (CDNs)](#content-delivery-networks-cdns)
+- [Anycast Networking](#anycast-networking)
 - [Security Components](#security-components)
 - [Web Stack Acronyms](#web-stack-acronyms)
+- [Comprehensive Web Infrastructure Lexicon](#comprehensive-web-infrastructure-lexicon)
 
 ## Network Basics
 
@@ -1336,6 +1339,659 @@ scrape_configs:
    - Test record propagation times
 
 By ensuring DNS availability exceeds the availability requirements of dependent applications, organizations can prevent DNS from becoming the limiting factor in overall system reliability.
+
+## Content Delivery Networks (CDNs)
+
+### What is a CDN?
+
+A Content Delivery Network (CDN) is a geographically distributed group of servers that work together to provide fast delivery of Internet content. CDNs store cached copies of website files (images, videos, HTML, JavaScript, CSS, etc.) in multiple locations around the world to reduce the physical distance between users and website resources.
+
+### How CDNs Work
+
+#### Basic Concept and Data Flow
+
+When a user requests content from a website using a CDN:
+
+1. The request first goes to the CDN instead of directly to the origin server
+2. The CDN routes the request to the nearest edge server (also called a Point of Presence or PoP)
+3. If the edge server has the content cached, it delivers it directly to the user
+4. If not, the edge server retrieves it from the origin server, delivers it to the user, and caches it for future requests
+
+```
+Without CDN:
+┌──────┐                            ┌──────────────┐
+│ User │◄─────── Long Distance ─────►│ Origin Server │
+└──────┘                            └──────────────┘
+
+With CDN:
+┌──────┐                  ┌───────────────┐                 ┌──────────────┐
+│ User │◄── Short Distance ─►│ CDN Edge Server │◄── Long Distance ──►│ Origin Server │
+└──────┘                  └───────────────┘    (First Time Only)   └──────────────┘
+```
+
+#### Key Technical Components
+
+1. **Edge Servers/PoPs**: Strategically placed data centers containing caching servers
+   - Typically located in major internet exchange points and metropolitan areas
+   - Range from dozens to thousands of locations depending on the CDN provider
+
+2. **Caching Algorithms**: Determine what content to store and for how long
+   - Object popularity monitoring
+   - Predictive content placement
+   - Tiered caching (memory, SSD, HDD)
+
+3. **Request Routing**: Technology that directs users to the optimal edge server
+   - DNS-based routing
+   - Anycast routing
+   - Application-layer routing
+
+#### CDN Distribution Methods
+
+CDNs use various methods to route users to the nearest edge server:
+
+1. **DNS-Based Routing**: 
+   - When a user looks up the domain, the CDN's DNS server returns the IP of the closest edge server
+   - Example: `image.website.com` resolves to the IP of the nearest edge server
+   - Implementation:
+     ```
+     # User DNS query for assets.example.com
+     # CDN DNS responds based on user location:
+     assets.example.com. 30 IN A 192.0.2.10 # (For users in Europe)
+     assets.example.com. 30 IN A 192.0.2.50 # (For users in Asia)
+     assets.example.com. 30 IN A 192.0.2.90 # (For users in North America)
+     ```
+
+2. **Anycast Routing**: 
+   - Multiple edge locations share the same IP address
+   - Internet routing protocols automatically direct requests to the nearest location
+   - Used by modern CDNs like Cloudflare
+   - Implementation:
+     ```
+     # All edge locations announce the same IP range via BGP
+     # Each location configures the same IP addresses on their servers
+     ip addr add 192.0.2.1/24 dev eth0
+     ```
+
+3. **HTTP Redirects**: 
+   - Less common method where users are HTTP-redirected to location-specific URLs
+   - Example: Redirecting to `eu-west.cdn.example.com` for European users
+
+### Benefits of Using a CDN
+
+#### 1. Performance Improvements
+- **Reduced Latency**: Content loads faster because it's served from a nearby location
+  - Typical latency reduction: 50-80%
+  - Example: A 2MB image loading in 200ms instead of 1000ms
+- **Faster Page Load Times**: Average 50% improvement in page load speed
+- **Bandwidth Optimization**: Reduced data transfer between origin servers and end users
+
+#### 2. Reliability and Scalability
+- **High Availability**: Content remains accessible even if some servers fail
+- **Traffic Handling**: Can absorb sudden traffic spikes that might overwhelm origin servers
+  - Example: News sites during breaking news events
+  - Sporting websites during major games
+- **Load Balancing**: Distributes traffic across multiple servers
+- **Origin Server Protection**: Reduces direct traffic to origin infrastructure
+
+#### 3. Security Benefits
+- **DDoS Protection**: Absorbs and disperses attack traffic across a distributed network
+- **Web Application Firewall (WAF)**: Filters out malicious traffic before it reaches origin servers
+- **TLS/SSL Acceleration**: Handles encryption overhead, reducing origin server load
+- **Bot Mitigation**: Identifies and blocks malicious automated traffic
+
+### CDN Architecture
+
+Modern CDNs typically have three tiers:
+
+1. **Edge Servers**: Located closest to end users, primarily responsible for content delivery
+   - Serve cached content directly to users
+   - Typically hundreds or thousands distributed globally
+
+2. **Regional Servers**: Aggregate content for a region and feed multiple edge locations
+   - Serve as a second-level cache
+   - Reduce load on the origin shield
+   - Typically dozens located in key regions
+
+3. **Origin Shield**: An intermediary layer that reduces load on the origin server
+   - Acts as a buffer between edge network and origin
+   - Consolidates cache misses to reduce origin load
+   - Typically a few strategically placed servers
+
+```
+                       ┌────────────────┐
+                       │  Origin Server │
+                       └────────────────┘
+                               ▲
+                               │
+                 ┌─────────────┴─────────────┐
+                 │                           │
+         ┌───────┴───────┐           ┌───────┴───────┐
+         │ Origin Shield │           │ Origin Shield │
+         └───────┬───────┘           └───────┬───────┘
+                 │                           │
+     ┌───────────┼───────────┐   ┌───────────┼───────────┐
+     │           │           │   │           │           │
+┌────┴────┐ ┌────┴────┐ ┌────┴────┐     ┌────┴────┐ ┌────┴────┐
+│ Regional│ │ Regional│ │ Regional│     │ Regional│ │ Regional│
+│ Server  │ │ Server  │ │ Server  │     │ Server  │ │ Server  │
+└────┬────┘ └────┬────┘ └────┬────┘     └────┬────┘ └────┬────┘
+     │           │           │               │           │
+  Multiple edge locations across the globe with many edge servers each
+```
+
+### Content Caching Mechanisms
+
+#### Cache Control Methods
+
+CDNs use several mechanisms to determine how content is cached:
+
+1. **HTTP Headers**: Origin servers can specify caching behavior using headers like:
+   - `Cache-Control: max-age=3600` (cache for 1 hour)
+   - `Expires: Wed, 21 Oct 2025 07:28:00 GMT`
+   - `ETag` and `Last-Modified` for validation
+   - Example header configuration:
+     ```
+     # Apache configuration example
+     <FilesMatch "\.(jpg|jpeg|png|gif|ico)$">
+       Header set Cache-Control "max-age=2592000, public"
+     </FilesMatch>
+     <FilesMatch "\.(css|js)$">
+       Header set Cache-Control "max-age=86400, public"
+     </FilesMatch>
+     ```
+
+2. **CDN-Specific Rules**: Custom rules defined in the CDN configuration:
+   - Cache certain file types longer (e.g., images for 30 days)
+   - Don't cache dynamic content
+   - Override origin cache headers
+   - Example Cloudflare rule:
+     ```
+     # Cache HTML for 2 hours even if origin says not to cache
+     URL path ends with .html
+     Edge TTL: 2 hours
+     Origin Cache Control: Override
+     ```
+
+#### Cache Invalidation
+
+Methods to remove or update cached content:
+
+1. **Purge/Invalidation APIs**: Immediately remove specific content from edge servers
+   - Example Fastly API call:
+     ```
+     curl -X POST -H "Fastly-Key: YOUR_API_KEY" \
+       https://api.fastly.com/service/SERVICE_ID/purge/URL_PATH
+     ```
+
+2. **Versioned URLs**: Change file paths (e.g., style.css?v=2) to serve fresh content
+   - Example implementation:
+     ```html
+     <!-- Before update -->
+     <link rel="stylesheet" href="/css/styles.css?v=1">
+     
+     <!-- After update -->
+     <link rel="stylesheet" href="/css/styles.css?v=2">
+     ```
+
+3. **TTL Expiration**: Wait for the cache time-to-live to expire naturally
+
+### Popular CDN Providers
+
+#### Global CDN Providers
+- **Cloudflare**: Known for security features and extensive free tier
+- **Akamai**: One of the oldest and largest CDNs, used by many Fortune 500 companies
+- **Fastly**: Popular for real-time capabilities and API-driven approach
+- **Amazon CloudFront**: Integrated with AWS services
+- **Google Cloud CDN**: Integrated with Google Cloud Platform
+- **Microsoft Azure CDN**: Integrated with Azure services
+
+#### Specialized CDN Services
+- **Cloudinary**: Specialized in image and video optimization
+- **BunnyCDN**: Cost-effective CDN focused on simplicity
+- **KeyCDN**: Developer-friendly pay-as-you-go CDN
+- **StackPath**: Security-focused CDN with edge computing features
+
+### CDN Implementation
+
+#### Basic Integration Steps
+
+1. **Sign up** with a CDN provider
+2. **Add your domain** to the CDN's management console
+3. **Configure the origin server** settings (where your original content is hosted)
+4. **Update DNS records** to point to the CDN (usually via a CNAME record)
+5. **Customize caching rules** based on your application needs
+
+#### Example DNS Configuration
+
+```
+# Before CDN implementation
+www.example.com.    IN    A    203.0.113.10
+
+# After CDN implementation
+www.example.com.    IN    CNAME    example-com.cdn-provider.net.
+```
+
+#### Common Challenges
+
+1. **Cache Invalidation**: Ensuring users get fresh content after updates
+2. **Dynamic Content**: Handling personalized or frequently changing content
+3. **Cookie Handling**: Managing user session data across edge locations
+4. **Origin Shield Configuration**: Balancing origin protection with performance
+5. **HTTPS Setup**: Managing SSL certificates across the CDN network
+
+### Advanced CDN Features
+
+#### Modern CDN Capabilities
+
+1. **Edge Computing**: Running serverless functions at edge locations
+   - Execute code closer to users
+   - Customize content delivery without origin server requests
+   - Example: Cloudflare Workers, AWS Lambda@Edge
+   - Example use case: Personalization without origin requests
+     ```javascript
+     // Cloudflare Worker example that personalizes content at the edge
+     addEventListener('fetch', event => {
+       event.respondWith(handleRequest(event.request))
+     })
+     
+     async function handleRequest(request) {
+       const url = new URL(request.url)
+       const country = request.headers.get('CF-IPCountry')
+       
+       // Get the original response from the origin
+       let response = await fetch(request)
+       let html = await response.text()
+       
+       // Personalize the content based on country at the edge
+       if (country === 'FR') {
+         html = html.replace('Welcome!', 'Bienvenue!')
+       }
+       
+       return new Response(html, {
+         headers: response.headers
+       })
+     }
+     ```
+
+2. **Image Optimization**:
+   - Automatic format conversion (JPEG, WebP, AVIF)
+   - Resizing based on device
+   - Compression and quality adjustment
+   - Example URL-based transformation:
+     ```
+     # Original image
+     https://cdn.example.com/images/photo.jpg
+     
+     # Edge-optimized version (WebP, resized, compressed)
+     https://cdn.example.com/images/photo.jpg?format=webp&width=800&quality=80
+     ```
+
+3. **Video Streaming Optimization**:
+   - Adaptive bitrate streaming
+   - Video transcoding
+   - Live streaming support
+   - Reduced buffering through edge delivery
+
+4. **Analytics and Monitoring**:
+   - Real-time traffic analysis
+   - Performance metrics
+   - Security event tracking
+   - Cache hit ratio monitoring
+
+### CDN Cost Considerations
+
+CDN pricing typically follows these models:
+
+1. **Bandwidth-Based Pricing**:
+   - Charges based on amount of data transferred
+   - Example: $0.08 per GB for first 10TB, $0.06 per GB for next 40TB
+   - Varies significantly by region (North America/Europe typically cheapest)
+
+2. **Request-Based Pricing**:
+   - Charges based on number of HTTP/HTTPS requests
+   - Example: $0.01 per 10,000 HTTP requests, $0.02 per 10,000 HTTPS requests
+
+3. **Region-Based Pricing**:
+   - Different rates for different geographic regions
+   - Example: Higher rates for South America, Asia-Pacific than North America
+
+4. **Feature-Based Pricing**:
+   - Additional costs for WAF, DDoS protection, image optimization
+   - Some providers bundle features, others charge separately
+
+5. **Free Tiers**:
+   - Cloudflare offers a robust free tier
+   - Other providers offer limited free bandwidth (e.g., 10GB/month)
+
+## Anycast Networking
+
+### What is Anycast?
+
+Anycast is a network addressing and routing method where multiple servers in different locations share the same IP address. Data packets are automatically routed to the "nearest" (in network terms) available server, providing improved redundancy, load distribution, and reduced latency.
+
+Unlike traditional unicast (one-to-one) or multicast (one-to-many) methods, anycast enables a one-to-nearest relationship, making it ideal for distributed critical services.
+
+### How Anycast Works
+
+#### Fundamental Concept
+
+Anycast operates on a simple principle: multiple servers in different locations announce the same IP address range to the internet. When a user sends a request to an anycast address, network routing protocols automatically direct it to the topologically nearest server announcing that address.
+
+```
+                        ┌────────────┐
+                        │            │
+                 ┌──────► Server A   │
+                 │      │ IP: 192.0.2.1
+                 │      └────────────┘
+                 │          (New York)
+   ┌─────────┐   │
+   │ Client  │───┤      ┌────────────┐
+   │         │   │      │            │
+   └─────────┘   └──────► Server B   │
+    (Chicago)    │      │ IP: 192.0.2.1
+                 │      └────────────┘
+                 │          (Dallas)
+                 │
+                 │      ┌────────────┐
+                 │      │            │
+                 └──────► Server C   │
+                        │ IP: 192.0.2.1
+                        └────────────┘
+                            (Seattle)
+```
+
+In this example, a client in Chicago connecting to IP 192.0.2.1 might be routed to the Dallas server because it has the best routing path, even though New York might be geographically closer.
+
+#### Technical Implementation
+
+Anycast works through standard internet routing protocols:
+
+1. **BGP (Border Gateway Protocol)**:
+   - Each server location uses BGP to announce the same IP prefix to the internet
+   - BGP is the main routing protocol that determines how data travels between networks
+   - Routing metrics (like AS path length) determine which announcement "wins"
+
+2. **Routing Decision Factors**:
+   - Number of network hops
+   - Administrative distances
+   - Transit agreements
+   - Link congestion
+   - ISP routing policies
+
+3. **No Special Client Configuration**:
+   - End users and clients need no special configuration
+   - From a client perspective, they're connecting to a single IP address
+   - The routing infrastructure handles the complexity
+
+#### BGP Implementation Example
+
+```
+# Router at Location A (ASN 64500 in New York)
+router bgp 64500
+ network 192.0.2.0/24
+ neighbor 198.51.100.1 remote-as 64501
+ neighbor 198.51.100.1 description Transit Provider 1
+ neighbor 203.0.113.1 remote-as 64502
+ neighbor 203.0.113.1 description Transit Provider 2
+
+# Router at Location B (Same ASN 64500, but in Dallas)
+router bgp 64500
+ network 192.0.2.0/24
+ neighbor 198.51.100.5 remote-as 64503
+ neighbor 198.51.100.5 description Transit Provider 3
+ neighbor 203.0.113.5 remote-as 64504
+ neighbor 203.0.113.5 description Transit Provider 4
+```
+
+Both locations announce the same network (192.0.2.0/24) but to different transit providers. Internet routing automatically directs client traffic to the "nearest" location.
+
+### Benefits of Anycast
+
+#### 1. High Availability and Redundancy
+- If one server fails, traffic automatically routes to the next best server
+- No manual failover or DNS changes required
+- Service continues without interruption
+- Eliminates single points of geographic failure
+
+#### 2. Load Distribution
+- Traffic naturally spreads across multiple locations
+- Clients are served by their nearest instance
+- Reduces congestion and improves response times
+- Automatic geographic load balancing
+
+#### 3. DDoS Mitigation
+- Distributes attack traffic across multiple locations
+- Absorbs more attack volume than single-location deployments
+- Attackers must overcome capacity at multiple locations simultaneously
+- More effective defense against volumetric attacks
+
+#### 4. Lower Latency
+- Users connect to the nearest available server
+- Reduces network round-trip time
+- Especially beneficial for latency-sensitive services like DNS
+- Improves user experience
+
+### Use Cases for Anycast
+
+#### DNS Services
+Anycast is widely used by DNS providers:
+- All 13 root DNS server letters use anycast (providing thousands of actual physical servers)
+- Commercial DNS providers like Cloudflare and Google (8.8.8.8) use anycast
+- Provides resilience against attacks and network outages
+
+#### Content Delivery Networks
+CDNs use anycast for their edge networks:
+- Entry points into their networks often use anycast IPs
+- Helps route users to the closest edge server
+- Combined with internal load balancing for optimal delivery
+
+#### DDoS Protection Services
+Security providers use anycast to mitigate attacks:
+- Attack traffic is spread across global scrubbing centers
+- Each location can filter and clean traffic
+- Clean traffic is then passed to origin servers
+
+#### Public Cloud Services
+Cloud providers use anycast for global services:
+- API endpoints
+- Global load balancers
+- Authentication services
+- Shared infrastructure services
+
+### Anycast vs. DNS-Based Global Load Balancing
+
+| Aspect | Anycast | DNS-Based Load Balancing |
+|--------|---------|-------------------|
+| Failover Speed | Immediate (seconds) | Delayed by DNS TTL (minutes to hours) |
+| Client Configuration | Single IP address | Multiple IP addresses may be returned |
+| Geographic Precision | Based on network topology | Can use client location data |
+| Implementation Complexity | Requires BGP routing | Simpler, uses standard DNS features |
+| Traffic Granularity | All traffic to an IP | Can split traffic by percentage |
+| Session Handling | May have issues with long connections | Better for persistent sessions |
+| Cost | Higher (BGP, ASN, IP space) | Lower |
+
+### Technical Requirements for Anycast Implementation
+
+To implement anycast, you need several specialized resources:
+
+1. **Autonomous System Number (ASN)**:
+   - Unique identifier for your network in BGP routing
+   - Obtained from Regional Internet Registries (RIRs) like ARIN, RIPE, APNIC
+   - Costs approximately $550-1000 annually
+   - Application process takes weeks to months
+
+2. **IP Address Space**:
+   - Your own IP address block (typically /24 or larger)
+   - Must be provider-independent (PI) space
+   - Assigned by RIRs
+   - Increasingly difficult to obtain due to IPv4 exhaustion
+   - Costs vary by region ($1,000-$2,000 annually)
+
+3. **BGP Routing Infrastructure**:
+   - Routers capable of BGP
+   - Transit providers willing to accept your announcements
+   - Multiple Points of Presence (PoPs)
+   - 24/7 network operations capabilities
+
+4. **Multiple Physical Locations**:
+   - Datacenter presence in different geographic areas
+   - Interconnection facilities
+   - Transit contracts in each location
+
+### Implementation Options for Different Organization Sizes
+
+#### For Large Organizations
+- Obtain own ASN and IP space
+- Deploy routers at multiple locations
+- Establish transit contracts with multiple providers
+- Manage BGP configurations and monitoring
+
+#### For Medium-Sized Organizations
+- Use a BGP service provider:
+  - Services like Vultr, Heficed, or Hurricane Electric
+  - They provide BGP announcements on your behalf
+  - Less control but much simpler implementation
+  - Lower cost threshold for entry
+
+#### For Small Organizations
+- Leverage cloud provider anycast services:
+  - AWS Global Accelerator
+  - Google Cloud Platform Premium Tier networking
+  - These abstract away BGP complexity
+  - Provide anycast-like functionality without BGP expertise
+
+#### Using Anycast Without BGP Capabilities
+- Use services built on anycast:
+  - Cloudflare
+  - Google Cloud DNS
+  - Fastly
+  - These providers have already built global anycast networks
+
+### Challenges and Limitations
+
+#### 1. Session Persistence
+- Route changes can lead to session disconnections
+- Problematic for long-lived TCP connections
+- Mitigation strategies:
+  - Use for stateless protocols (DNS, HTTP with proper architecture)
+  - Session cookies that work across locations
+  - Shared backend state
+
+#### 2. Monitoring and Troubleshooting
+- Difficult to get unified logs across all instances
+- Requires sophisticated monitoring systems
+- Hard to trace specific traffic paths
+- Solutions:
+  - Centralized logging infrastructure
+  - Unique identifiers in logs to track location
+  - Synthetic monitoring from multiple vantage points
+
+#### 3. Consistent Configuration
+- All anycast instances must provide identical service
+- Configuration changes must be synchronized
+- Service inconsistencies can cause user-visible issues
+- Approaches:
+  - Configuration management systems (Ansible, Puppet)
+  - Containers for consistent deployments
+  - Automated testing across locations
+
+### Practical Anycast Deployment Example
+
+#### Simple Anycast DNS Service
+
+1. **Infrastructure Requirements**:
+   - Two or more physical locations
+   - BGP-capable routers
+   - ASN and IP space
+   - DNS server software
+
+2. **Router Configuration** (Location A):
+   ```
+   router bgp 64500
+    network 192.0.2.0/24
+    neighbor 203.0.113.1 remote-as 64501
+   ```
+
+3. **Router Configuration** (Location B):
+   ```
+   router bgp 64500
+    network 192.0.2.0/24
+    neighbor 198.51.100.1 remote-as 64502
+   ```
+
+4. **Server Configuration** (Both Locations):
+   ```
+   # Configure anycast IP on server interface
+   ip addr add 192.0.2.1/32 dev lo
+   ip route add local 192.0.2.0/24 dev lo
+   
+   # DNS server configuration (identical on both servers)
+   # BIND named.conf example
+   zone "example.com" {
+       type master;
+       file "/etc/bind/zones/example.com.zone";
+   };
+   ```
+
+5. **Client Experience**:
+   - Clients use 192.0.2.1 as their DNS server
+   - Traffic automatically routes to nearest operational server
+   - If one location fails, clients transparently use the other location
+
+### Combining Anycast and DNS Load Balancing
+
+Many large-scale infrastructures use both techniques together:
+
+1. **Layered Approach**:
+   - Anycast provides the first level of geographic routing
+   - DNS-based load balancing provides finer-grained control
+   - Local load balancers handle server selection within a location
+
+2. **Complementary Strengths**:
+   - Anycast provides immediate failover and optimal routing
+   - DNS provides traffic shaping and intelligent distribution
+   - Together they create a robust global traffic management system
+
+3. **Practical Example**:
+   ```
+   # DNS configuration with multiple levels
+   # Top level: Anycast IPs for nameservers
+   example.com.    IN    NS    ns1.example.com.  # Anycast
+   example.com.    IN    NS    ns2.example.com.  # Anycast
+   
+   # Second level: DNS-based geographic load balancing
+   www.example.com.    IN    A    203.0.113.10  # US users
+   www.example.com.    IN    A    198.51.100.10  # EU users
+   
+   # Third level: Local load balancing at each datacenter
+   ```
+
+### Anycast Best Practices
+
+1. **Start Small**:
+   - Begin with two or three locations
+   - Expand gradually as experience grows
+   - Test thoroughly before adding locations
+
+2. **Consistent Service Delivery**:
+   - Ensure identical configuration across all locations
+   - Automate deployment and configuration
+   - Regular testing of all instances
+
+3. **Monitoring**:
+   - Monitor from multiple external locations
+   - Track which anycast instance is serving which regions
+   - Set up alerts for route changes or service inconsistencies
+
+4. **Documentation**:
+   - Maintain detailed network maps
+   - Document all BGP peer relationships
+   - Keep routing policies clearly defined
+
+5. **Security Considerations**:
+   - Implement BGP security measures (RPKI, route filtering)
+   - Monitor for BGP hijacking attempts
+   - Regular security audits of anycast infrastructure
 
 ### Main DNS Record Types
 
