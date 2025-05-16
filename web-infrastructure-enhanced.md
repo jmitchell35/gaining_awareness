@@ -840,6 +840,221 @@ While many organizations use managed DNS services provided by registrars or clou
 - Knot DNS: High-performance authoritative server
 - NSD (Name Server Daemon): Focused on security and stability
 
+#### High-Availability DNS Architectures
+
+**Clustered Authoritative DNS Servers**
+
+DNS servers can be deployed in clusters to provide high availability for authoritative DNS services. This approach ensures that DNS resolution remains operational even if individual DNS servers fail.
+
+**How DNS Server Clustering Works:**
+1. Multiple DNS server instances operate as a unified system
+2. Changes to DNS records are synchronized across all servers in the cluster
+3. DNS queries can be handled by any server in the cluster
+4. If one server fails, others continue providing service with no interruption
+
+**Implementation Approaches:**
+
+1. **Primary-Secondary Architecture**
+   - One primary (master) server holds the authoritative zone data
+   - Multiple secondary (slave) servers replicate data from the primary
+   - Zone transfers (AXFR/IXFR) keep secondary servers updated
+   - If the primary fails, secondary servers continue serving data (but updates may be delayed)
+   - Example configuration (BIND):
+     ```
+     // Primary server configuration
+     zone "example.com" {
+         type master;
+         file "/etc/bind/zones/example.com.db";
+         allow-transfer { 192.168.1.2; 192.168.1.3; }; // Secondary server IPs
+     };
+     
+     // Secondary server configuration
+     zone "example.com" {
+         type slave;
+         file "/var/cache/bind/example.com.db";
+         masters { 192.168.1.1; }; // Primary server IP
+     };
+     ```
+
+2. **Multi-Primary Architecture**
+   - Multiple servers act as primaries simultaneously
+   - Each can accept and process zone updates
+   - Changes must be synchronized between servers (often using database backends)
+   - More complex but eliminates the primary server as a single point of failure
+   - Example implementation (PowerDNS with MySQL backend):
+     ```
+     # PowerDNS configuration with shared MySQL backend
+     launch=gmysql
+     gmysql-host=shared-database.example.com
+     gmysql-dbname=pdns
+     gmysql-user=pdns
+     gmysql-password=secure-password
+     ```
+
+3. **Hidden Primary Architecture**
+   - Primary server is not publicly accessible
+   - Only used for zone administration
+   - Multiple public-facing secondary servers handle all external queries
+   - Increases security by protecting the writable primary server
+   - Diagram:
+     ```
+     ┌─────────────┐         ┌─────────────┐
+     │ DNS Admin   │─────────► Hidden      │
+     │ Interface   │         │ Primary DNS │
+     └─────────────┘         └─────────────┘
+                                    │
+                                    │ Zone Transfers
+                                    ▼
+     ┌─────────────┐         ┌─────────────┐         ┌─────────────┐
+     │ Public      │         │ Public      │         │ Public      │
+     │ Secondary   │◄────────► Secondary   │◄────────► Secondary   │
+     │ DNS Server  │         │ DNS Server  │         │ DNS Server  │
+     └─────────────┘         └─────────────┘         └─────────────┘
+            ▲                       ▲                       ▲
+            │                       │                       │
+            └───────────────────────┼───────────────────────┘
+                                    │
+                                    │ DNS Queries
+                                    │
+                              ┌─────────────┐
+                              │ Internet    │
+                              │ Clients     │
+                              └─────────────┘
+     ```
+
+**Floating DNS Records and Virtual IP Addressing**
+
+Floating DNS records are a high-availability technique that allows DNS services to remain operational even when individual servers fail.
+
+**How Floating DNS Records Work:**
+1. Multiple DNS servers are configured to respond to the same IP address
+2. This shared IP address "floats" between servers using virtual IP (VIP) technology
+3. If the active server fails, the IP address automatically moves to a healthy server
+4. Clients experience no disruption as they continue to query the same IP address
+
+**Implementation Technologies:**
+
+1. **Keepalived for DNS High Availability**
+   - Uses VRRP (Virtual Router Redundancy Protocol) to manage the floating IP
+   - Automatically performs health checks on DNS services
+   - Moves the virtual IP if the DNS service fails or becomes unresponsive
+   - Example configuration:
+     ```
+     # Primary DNS Server Keepalived Configuration
+     vrrp_script check_named {
+         script "pidof named"
+         interval 2
+         weight -20
+     }
+     
+     vrrp_instance DNS_VRRP {
+         state MASTER
+         interface eth0
+         virtual_router_id 51
+         priority 101
+         advert_int 1
+         authentication {
+             auth_type PASS
+             auth_pass dnscluster
+         }
+         virtual_ipaddress {
+             192.168.1.100/24
+         }
+         track_script {
+             check_named
+         }
+     }
+     ```
+
+2. **Anycast DNS Architecture**
+   - Same IP address announced from multiple locations via BGP
+   - Network routing protocols direct queries to the nearest operational server
+   - Provides both redundancy and performance benefits
+   - Used by most major DNS providers for global resilience
+   - Implementation example:
+     ```
+     # BGP Configuration Example (Bird)
+     protocol bgp {
+         local as 65000;
+         neighbor 192.168.1.1 as 65001;
+         export filter {
+             if net = 192.0.2.0/24 then accept; # Announce DNS service IP
+             reject;
+         };
+     }
+     ```
+
+3. **DNS Failover with Health Checks**
+   - External monitoring system checks DNS server health
+   - If a server fails, DNS records are automatically updated to point to healthy servers
+   - Requires DNS providers that support API-based updates
+   - Example with AWS Route 53:
+     ```javascript
+     // API call to update Route 53 record
+     const params = {
+       ChangeBatch: {
+         Changes: [
+           {
+             Action: "UPSERT",
+             ResourceRecordSet: {
+               Name: "dns.example.com",
+               Type: "A",
+               TTL: 60,
+               ResourceRecords: [
+                 { Value: "192.168.1.2" } // IP of healthy server
+               ]
+             }
+           }
+         ]
+       },
+       HostedZoneId: "Z1PA6795UKMFR9"
+     };
+     route53.changeResourceRecordSets(params).promise();
+     ```
+
+**Handling DNS Synchronization in Clusters**
+
+For DNS clusters to function properly, zone data must remain synchronized across all servers.
+
+**Synchronization Methods:**
+
+1. **Standard Zone Transfers**
+   - AXFR (full zone transfer) or IXFR (incremental zone transfer) protocols
+   - Triggered by serial number changes in SOA records
+   - Initiated either by notify messages or scheduled polling
+   - Simple but potentially delayed synchronization
+
+2. **Database Backend Replication**
+   - Zone data stored in replicated databases (MySQL, PostgreSQL)
+   - All DNS servers read from the database
+   - Database handles replication and consistency
+   - Common in PowerDNS and other modern DNS servers
+
+3. **File Synchronization**
+   - Zone files synchronized using rsync, Git, or other file replication tools
+   - Can be triggered by zone changes or run on a schedule
+   - May require additional scripting for automation
+
+**DNS Cluster Monitoring**
+
+Monitoring is critical for DNS clusters to ensure proper operation and synchronization.
+
+**Key Metrics to Monitor:**
+- Query response times
+- Query success rates
+- Zone serial number consistency across servers
+- Zone transfer success and failure rates
+- Resource utilization (CPU, memory, network)
+- Service availability from multiple locations
+
+**Example Monitoring Configuration (Prometheus with BIND exporter):**
+```yaml
+scrape_configs:
+  - job_name: 'bind_exporter'
+    static_configs:
+      - targets: ['dns1.example.com:9119', 'dns2.example.com:9119', 'dns3.example.com:9119']
+```
+
 #### Key Considerations for Self-Hosting DNS
 
 **Technical Requirements**:
@@ -847,30 +1062,35 @@ While many organizations use managed DNS services provided by registrars or clou
 - Redundant systems for high availability (at least two servers)
 - Regular backups of configuration and zone data
 - Monitoring systems to alert on issues
+- Virtual IP addressing or load balancing for service continuity
 
 **Operational Challenges**:
 - Maintaining 24/7 availability (DNS is critical infrastructure)
 - Keeping up with security patches and best practices
 - Managing zone transfers between primary and secondary servers
 - Handling DNSSEC if implemented
+- Ensuring synchronization across clustered DNS servers
 
 **Security Concerns**:
 - DNS servers are common attack targets
 - Need protection against DNS amplification attacks
 - Preventing cache poisoning and other DNS-specific vulnerabilities
 - Implementing proper access controls
+- Securing zone transfer channels between servers
 
 **When Self-Hosting Makes Sense**:
 - Large enterprises with specialized DNS needs
 - Organizations with strict control requirements
 - Environments with substantial internal DNS requirements
 - When integration with internal systems is critical
+- When custom high-availability architecture is needed
 
 **When Managed DNS is Preferable**:
 - Small to medium organizations with limited IT resources
 - When global distribution and high performance are needed
 - When DDoS protection is a priority
 - To reduce operational overhead
+- When advanced anycast capabilities are required
 
 ### Main DNS Record Types
 
